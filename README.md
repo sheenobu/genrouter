@@ -61,7 +61,6 @@ Code is based on stringer, therefore has the go BSD-style license
 
 ## TODO:
 
- * Generate return values properly using ast
  * Better error names
  * Potentially make an object-based approach as well?
     * r :=NewRouter()

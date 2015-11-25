@@ -17,10 +17,10 @@ func RegisterRoute(ctx context.Context, key string, val Route) context.Context {
 	return context.WithValue(ctx, routeRouterKey, mp)
 }
 
-func CallRoute(ctx context.Context, key string, name string) error {
+func CallRoute(ctx context.Context, key string, name string) (context.Context, error) {
 	r, ok := routefromContext(ctx, key)
 	if !ok {
-		return errors.New("Can't find route")
+		return ctx, errors.New("Can't find route")
 	}
 
 	return r(ctx, name)

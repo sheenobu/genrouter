@@ -52,6 +52,33 @@ func (g *Generator) generateContext(key string, fn string) {
 		callArgStr = strings.Join(callargs, ", ")
 	}
 
+	retargs := []string{}
+	errRetVals := []string{}
+
+	for _, field := range g.Results.List {
+		buf := bytes.NewBuffer([]byte(""))
+		format.Node(buf, token.NewFileSet(), field.Type)
+
+		t := string(buf.Bytes())
+		switch t {
+		case "error":
+			errRetVals = append(errRetVals, "errors.New(\"Can't find route\")")
+		case "int", "uint", "int32", "uint32", "uint16", "int16", "int8", "uint8", "byte", "char", "uint64", "int64", "float64", "float32", "float":
+			errRetVals = append(errRetVals, "0")
+		case "string":
+			errRetVals = append(errRetVals, "\"\"")
+		case "context.Context":
+			errRetVals = append(errRetVals, "ctx")
+		default:
+			errRetVals = append(errRetVals, "nil")
+		}
+
+		retargs = append(retargs, t)
+	}
+
+	retArgStr := "(" + strings.Join(retargs, ", ") + ")"
+	errRetStr := strings.Join(errRetVals, ", ")
+
 	data := contextData{
 		Invocation:  strings.Join(os.Args[1:], " "),
 		Package:     g.pkg.name,
@@ -62,10 +89,9 @@ func (g *Generator) generateContext(key string, fn string) {
 		ContextKeyType: strings.ToLower(fn) + "RouterKeyType",
 		ContextKey:     strings.ToLower(fn) + "RouterKey",
 
-		//TODO: populate empty values based on parsed type
 		Args:            argStr,
-		ReturnParams:    "error",
-		ErrorReturnVals: "errors.New(\"Can't find route\")",
+		ReturnParams:    retArgStr,
+		ErrorReturnVals: errRetStr,
 		CallArgs:        callArgStr,
 	}
 

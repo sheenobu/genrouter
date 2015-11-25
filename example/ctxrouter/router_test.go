@@ -13,15 +13,22 @@ func TestRouter(t *testing.T) {
 
 	wg.Add(1)
 
-	ctx := RegisterRoute(context.Background(), "my-route", func(ctx context.Context, str string) error {
+	ctx := RegisterRoute(context.Background(), "my-route", func(ctx context.Context, str string) (context.Context, error) {
 		if str != "hello world" {
-			return errors.New("Mismatched")
+			return ctx, errors.New("Mismatched")
 		}
 		wg.Done()
-		return nil
+		return ctx, nil
 	})
 
-	CallRoute(ctx, "my-route", "hello world")
+	newCtx, err := CallRoute(ctx, "my-route", "hello world")
+	if err != nil {
+		t.Errorf("Error should have been nil, is %s", err)
+	}
+
+	if newCtx == nil {
+		t.Errorf("new context should not have been nil")
+	}
 
 	wg.Wait()
 }

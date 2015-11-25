@@ -53,6 +53,8 @@ func (g *Generator) generateGlobal(key string, fn string) {
 	retargs := []string{}
 	errRetVals := []string{}
 
+	imports := ""
+
 	for _, field := range g.Results.List {
 		buf := bytes.NewBuffer([]byte(""))
 		format.Node(buf, token.NewFileSet(), field.Type)
@@ -66,6 +68,7 @@ func (g *Generator) generateGlobal(key string, fn string) {
 		case "string":
 			errRetVals = append(errRetVals, "\"\"")
 		case "context.Context":
+			imports = imports + " \"golang.org/x/net/context\" "
 			errRetVals = append(errRetVals, "ctx")
 		default:
 			errRetVals = append(errRetVals, "nil")
@@ -84,6 +87,8 @@ func (g *Generator) generateGlobal(key string, fn string) {
 		LockName:   strings.ToLower(fn) + "s" + "Lock",
 		KeyType:    key,
 		FnType:     fn,
+
+		AdditionalImports: imports,
 
 		Args:            argStr,
 		ReturnParams:    retArgStr,

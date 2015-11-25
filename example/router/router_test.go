@@ -11,12 +11,14 @@ func TestRouter(t *testing.T) {
 
 	wg.Add(1)
 
-	RegisterRoute("my-route", func() error {
+	RegisterRoute("my-route", func(pl *Payload) error {
 		wg.Done()
 		return nil
 	})
 
-	CallRoute("my-route")
+	CallRoute("my-route", &Payload{
+		Message: "hello world",
+	})
 
 	wg.Wait()
 

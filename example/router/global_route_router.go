@@ -22,7 +22,7 @@ func RegisterRoute(key string, val Route) {
 	routes[key] = val
 }
 
-func CallRoute(key string) error {
+func CallRoute(key string, p *Payload) error {
 	routesLock.RLock()
 	defer routesLock.RUnlock()
 	r, ok := routes[key]
@@ -31,5 +31,5 @@ func CallRoute(key string) error {
 		return errors.New("Can't find route")
 	}
 
-	return r()
+	return r(p)
 }

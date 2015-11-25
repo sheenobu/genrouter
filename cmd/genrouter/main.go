@@ -84,6 +84,9 @@ func isDirectory(name string) bool {
 type Generator struct {
 	buf bytes.Buffer
 	pkg *Package
+
+	Params  *ast.FieldList
+	Results *ast.FieldList
 }
 
 type File struct {
@@ -161,8 +164,27 @@ func (g *Generator) parsePackage(directory string, names []string, text interfac
 	g.pkg.name = astFiles[0].Name.Name
 	g.pkg.files = files
 	g.pkg.dir = directory
+
 	// Type check the package.
 	g.pkg.check(fs, astFiles)
+
+	for _, f := range astFiles {
+		for _, d := range f.Decls {
+			if gn, ok := d.(*ast.GenDecl); ok {
+				for _, spec := range gn.Specs {
+					if ts, ok := spec.(*ast.TypeSpec); ok {
+						if ts.Name.Name == *fnType {
+							if fn, ok := ts.Type.(*ast.FuncType); ok {
+								g.Params = fn.Params
+								g.Results = fn.Results
+							}
+						}
+					}
+				}
+			}
+		}
+
+	}
 }
 
 // check type-checks the package. The package must be OK to proceed.

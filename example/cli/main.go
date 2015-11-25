@@ -119,11 +119,11 @@ func main() {
 		}
 		segments := strings.Split(line, " ")
 
-		if segments[0] == "" {
+		cmdName := strings.TrimSpace(segments[0])
+		if cmdName == "" {
 			continue
 		}
 
-		cmdName := strings.TrimSpace(segments[0])
 		err = core.CallCommand(ctx, cmdName, &core.Message{
 			Data: segments[1:],
 		})

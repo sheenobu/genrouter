@@ -11,20 +11,47 @@ can be globally accessable with a RWMutex or they can be attached to an x/net/co
 
 route.go:
 
-	//go:generate genrouter -type global -fntype MyRoute -keytype string
-	
-	type MyRoute func() error
+	import (
+		"golang.org/x/net/context"
+	)
 
+	//go:generate genrouter -type global -fntype MyRoute -keytype string
+	//go:generate genrouter -type context -fntype OtherRoute -keytype string
+	
+	type MyRoute func(param string) error
+
+	// context must be first!
+	type OtherRoute func(ctx context.Context, msg *Message) error
+
+	type Message struct {
+		M string
+	}
 
 main.go:
 
-	func MyCustomRoute() error {
+	import (
+		"golang.org/x/net/context"
+	)
+
+	func MyCustomRoute(param string) error {
+		return nil
+	}
+
+	func MyOtherRoute(ctx context.Context, msg *Message) error {
 		return nil
 	}
 
 	func main() {
+		// routing data is global
 		RegisterMyRoute("name", MyCustomRoute)
-		CallMyRoute("name")
+		CallMyRoute("name", "Hello World")
+
+
+		// routing data is attached to x/net/context
+		ctx := context.Background()
+		ctx = RegisterOtherRoute(ctx, "name", MyOtherRoute)
+
+		CallOtherRoute(ctx, "name", &Message{"Hello World"})
 	}
 
 

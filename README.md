@@ -15,8 +15,8 @@ route.go:
 		"golang.org/x/net/context"
 	)
 
-	//go:generate genrouter -type global -fntype MyRoute -keytype string
-	//go:generate genrouter -type context -fntype OtherRoute -keytype string
+	//go:generate genrouter -type global -fntype MyRoute -keytype string .
+	//go:generate genrouter -type context -fntype OtherRoute -keytype string .
 	
 	type MyRoute func(param string) error
 
